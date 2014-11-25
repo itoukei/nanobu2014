@@ -71,7 +71,7 @@
     $dx=$xoffset+1;
     if ($dx>=$step) $dx-=$step;
     printf("[<a href=\"%s&xoffset=%d&yoffset=%d\">→</a>] ",$url,$dx,$yoffset);
-    printf("(xoffset %d, yoffset %d)\n",$xoffset,$yoffset);
+    printf("(xoffset %d, yoffset %d)<br/>\n",$xoffset,$yoffset);
 
     // 1x1の枠画像
     $waku=imagecolorallocate($image,100,100,255);
@@ -103,17 +103,19 @@
     }
 
     // mxnのブロックを置けるところに置いてみる...
-    $matrix=putblock("2x4",$matrix);
+    $color['2x4']=imagecolorallocate($image,255,80,80);
+    $matrix=putblock('2x4',$matrix);
+    $color['2x2']=imagecolorallocate($image,255,80,255);
+    $matrix=putblock('2x2',$matrix);
     foreach ($matrix as $x => $line) {
       foreach ($line as $y => $dot) {
 	if (preg_match('/([0-9]+)x([0-9]+)/',$dot,$r)) {
 	  //printf("[%d,%d]=%s\n",$x,$y,$dot);
-	  $block=imagecolorallocate($image,255,80,80);
 	  $x1=$x*$step+$xoffset;
 	  $y1=$y*$step+$yoffset;
 	  $x2=($x+$r[1])*$step+$xoffset-1;
 	  $y2=($y+$r[2])*$step+$yoffset-1;
-	  imagerectangle($image,$x1,$y1,$x2,$y2,$block);
+	  imagerectangle($image,$x1,$y1,$x2,$y2,$color[$dot]);
 	}
       }
     }
@@ -141,9 +143,9 @@
 	  if ($y>$ymax) $ymax=$y;
 	}
       }
-      printf("%dx%d: xmax%d, ymax%d\n",$dx,$dy,$xmax,$ymax);
 
       // ブロックを置ける場所を探す
+      $bcount=0;
       for ($y=0;$y<=$ymax;$y++) {
 	for ($x=0;$x<=$xmax;$x++) {
 	  if (isset($matrix[$x][$y]) && $matrix[$x][$y]==1) {
@@ -163,11 +165,16 @@
 		}
 	      }
 	      $matrix[$x][$y]=$size;
+	      $bcount++;
 	    }
 	  }
 	}
       }
+
+      printf("put %dx%d block: %d<br/>\n",$dx,$dy,$bcount);
     }
+
+
     return $matrix;
   }
 
