@@ -102,10 +102,15 @@
       }
     }
 
-    // mxnのブロックを置けるところに置いてみる...
-    $color['2x4']=imagecolorallocate($image,255,80,80);
+    // m*nのブロックを置けるところに置いてみる...
+    $border['2x4']=imagecolorallocate($image,255,80,80);
+    $color['2x4']=imagecolorallocate($image,255,120,120);
     $matrix=putblock('2x4',$matrix);
-    $color['2x2']=imagecolorallocate($image,255,80,255);
+    $border['4x2']=imagecolorallocate($image,40,200,40);
+    $color['4x2']=imagecolorallocate($image,120,255,120);
+    $matrix=putblock('4x2',$matrix);
+    $border['2x2']=imagecolorallocate($image,255,80,255);
+    $color['2x2']=imagecolorallocate($image,255,120,255);
     $matrix=putblock('2x2',$matrix);
     foreach ($matrix as $x => $line) {
       foreach ($line as $y => $dot) {
@@ -115,7 +120,8 @@
 	  $y1=$y*$step+$yoffset;
 	  $x2=($x+$r[1])*$step+$xoffset-1;
 	  $y2=($y+$r[2])*$step+$yoffset-1;
-	  imagerectangle($image,$x1,$y1,$x2,$y2,$color[$dot]);
+	  imagerectangle($image,$x1,$y1,$x2,$y2,$border[$dot]);
+	  imagefilledrectangle($image,$x1+1,$y1+1,$x2-1,$y2-1,$color[$dot]);
 	}
       }
     }
@@ -148,12 +154,12 @@
       $bcount=0;
       for ($y=0;$y<=$ymax;$y++) {
 	for ($x=0;$x<=$xmax;$x++) {
-	  if (isset($matrix[$x][$y]) && $matrix[$x][$y]==1) {
+	  if (noblock($matrix,$x,$y)) {
 	    // ブロックが置けるかどうか判定
 	    $count=0;
 	    for ($j=0;$j<$dy;$j++) {
 	      for ($i=0;$i<$dx;$i++) {
-		if (isset($matrix[$x+$i][$y+$j]) && $matrix[$x+$i][$y+$j]==1) $count++;
+		if (noblock($matrix,$x+$i,$y+$j)) $count++;
 	      }
 	    }
 	    // ブロックを置けるなら置く
@@ -176,6 +182,11 @@
 
 
     return $matrix;
+  }
+
+  // ブロックが置ける場所かどうか返す
+  function noblock($matrix,$x,$y) {
+    return (isset($matrix[$x][$y]) && $matrix[$x][$y]==1);
   }
 
 ?>
