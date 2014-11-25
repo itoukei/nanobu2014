@@ -55,6 +55,7 @@
     }
     printf("</select> block<br/>\n");
 
+    // X/Yオフセット選択用リンク
     $url=sprintf("?source=%s&blocksize=%d",str_replace(getcwd().'/','',$source),$step);
     $dx=$xoffset-1;
     if ($dx<0) $dx=$step-1;
@@ -70,6 +71,7 @@
     printf("[<a href=\"%s&xoffset=%d&yoffset=%d\">→</a>] ",$url,$dx,$yoffset);
     printf("(xoffset %d, yoffset %d)\n",$xoffset,$yoffset);
 
+    // 1x1の枠画像
     $waku=imagecolorallocate($image,100,100,255);
     for ($y=$yoffset;$y<$height;$y+=$step) {
       for ($x=$xoffset;$x<$width;$x+=$step) {
@@ -79,18 +81,19 @@
 	  for ($i=0;$i<$step;$i++) {
 	    $col=imagecolorat($image,$x+$i,$y+$j);
 	    if ($col==0xffffff) {
-	      $wcount++;
+	      $wcount++; // 白いピクセルを数える
 	    } else {
-	      $ocount++;
+	      $ocount++; // 白以外のピクセルを数える
 	    }
 	  }
 	}
-	if ($ocount>=$wcount) {
+	if ($ocount>=$wcount) { // 白の方が少なければ枠画像表示
 	  imagerectangle($image,$x,$y,$x+$step-1,$y+$step-1,$waku);
 	}
       }
     }
-    //$fn=tempnam("tmp","genmat");
+
+    // 枠を重ねた画像を表示
     $fn=sprintf("%s/blocksize%dxoffset%dyoffset%d.png",$path,$step,$xoffset,$yoffset);
     imagepng($image,$fn);
     printf("<div><img src=\"%s\"/></div>",str_replace(getcwd().'/','',$fn));
@@ -101,11 +104,6 @@
 <form method="post" enctype="multipart/form-data">
 <table>
 <tr><td>pngfile</td><td><input type=file name="pngfile" /></td></tr>
-<!--
-<tr><td>blocksize</td><td><input type=text name="blocksize" value="10"/></td></tr>
-<tr><td>xoffset</td><td><input type=text name="xoffset" value="0" /></td></tr>
-<tr><td>yoffset</td><td><input type=text name="yoffset" value="0" /></td></tr>
--->
 <tr><td></td><td><input type=submit value="Upload" /></td></tr>
 </table>
 </form>
