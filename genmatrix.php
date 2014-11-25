@@ -24,7 +24,9 @@
   }
 
   if (isset($source) && isset($path)) {
+    // 元画像を読み込む
     $image=imagecreatefrompng($source);
+
     // 画像サイズの取得と表示
     $width=imagesx($image);
     $height=imagesy($image);
@@ -73,6 +75,9 @@
 
     // 1x1の枠画像
     $waku=imagecolorallocate($image,100,100,255);
+
+    // ブロックを置くべき場所を取得しながら、ひとまず1x1の枠を描画
+    $matrix=array();
     for ($y=$yoffset;$y<$height;$y+=$step) {
       for ($x=$xoffset;$x<$width;$x+=$step) {
 	$wcount=0;
@@ -89,6 +94,26 @@
 	}
 	if ($ocount>=$wcount) { // 白の方が少なければ枠画像表示
 	  imagerectangle($image,$x,$y,$x+$step-1,$y+$step-1,$waku);
+	  $mx=($x-$xoffset)/$step;
+	  $my=($y-$yoffset)/$step;
+	  if (!isset($matrix[$mx])) $matrix[$mx]=array();
+	  $matrix[$mx][$my]=1;
+	}
+      }
+    }
+
+    // mxnのブロックを置けるところに置いてみる...
+    $matrix=putblock("2x4",$matrix);
+    foreach ($matrix as $x => $line) {
+      foreach ($line as $y => $dot) {
+	if (preg_match('/([0-9]+)x([0-9]+)/',$dot,$r)) {
+	  //printf("[%d,%d]=%s\n",$x,$y,$dot);
+	  $block=imagecolorallocate($image,255,80,80);
+	  $x1=$x*$step+$xoffset;
+	  $y1=$y*$step+$yoffset;
+	  $x2=($x+$r[1])*$step+$xoffset-1;
+	  $y2=($y+$r[2])*$step+$yoffset-1;
+	  imagerectangle($image,$x1,$y1,$x2,$y2,$block);
 	}
       }
     }
@@ -99,6 +124,53 @@
     printf("<div><img src=\"%s\"/></div>",str_replace(getcwd().'/','',$fn));
     return;
   }
+
+  // 指定サイズのブロックを置ける場所に置く
+  function putblock($size,$matrix) {
+    if (preg_match('/([0-9]+)x([0-9]+)/',$size,$r)) {
+      // 置きたいブロックのサイズ
+      $dx=$r[1];
+      $dy=$r[2];
+
+      // X方向,Y方向のサイズ取得
+      $xmax=0;
+      $ymax=0;
+      foreach ($matrix as $x => $line) {
+	if ($x>$xmax) $xmax=$x;
+	foreach ($line as $y => $dot) {
+	  if ($y>$ymax) $ymax=$y;
+	}
+      }
+      printf("%dx%d: xmax%d, ymax%d\n",$dx,$dy,$xmax,$ymax);
+
+      // ブロックを置ける場所を探す
+      for ($y=0;$y<=$ymax;$y++) {
+	for ($x=0;$x<=$xmax;$x++) {
+	  if (isset($matrix[$x][$y]) && $matrix[$x][$y]==1) {
+	    // ブロックが置けるかどうか判定
+	    $count=0;
+	    for ($j=0;$j<$dy;$j++) {
+	      for ($i=0;$i<$dx;$i++) {
+		if (isset($matrix[$x+$i][$y+$j]) && $matrix[$x+$i][$y+$j]==1) $count++;
+	      }
+	    }
+	    // ブロックを置けるなら置く
+	    if ($count==$dx*$dy) {
+	      //printf("[%d x %d]",$x,$y);
+	      for ($j=0;$j<$dy;$j++) {
+		for ($i=0;$i<$dx;$i++) {
+		  $matrix[$x+$i][$y+$j]=0;
+		}
+	      }
+	      $matrix[$x][$y]=$size;
+	    }
+	  }
+	}
+      }
+    }
+    return $matrix;
+  }
+
 ?>
 <!-- 画像アップロード前のWebフォーム -->
 <form method="post" enctype="multipart/form-data">
