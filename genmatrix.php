@@ -1,4 +1,6 @@
 <?php
+
+  // アップロード済みの画像で再表示する場合
   if (isset($_GET['source'])) {
     $source=$_GET['source'];
     if (file_exists($source)) {
@@ -8,6 +10,7 @@
       unset($source);
     }
   }
+  // 新規にアップロードされた画像で表示する場合
   if (is_array($_FILES) && is_array($_FILES['pngfile'])) {
     // デバッグ用表示
     //print_r($_FILES);
@@ -46,6 +49,11 @@
     $yoffset=0;
     if (isset($_POST['yoffset']) && preg_match('/[0-9]+/',$_POST['yoffset'],$r)) {
       $yoffset=$r[0];
+    }
+
+    $blockorder=array('2x4','4x2','2x2');
+    if (isset($_POST['order']) && preg_match('/[0-9]+x[0-9]+/',$_POST['order'])) {
+      $blockorder=explode(',',$_POST['order']);
     }
 
     // マス目サイズ選択用セレクタ
@@ -102,16 +110,31 @@
       }
     }
 
-    // m*nのブロックを置けるところに置いてみる...
+    // 各サイズのブロックの境界色と塗りつぶし色の設定
     $border['2x4']=imagecolorallocate($image,255,80,80);
     $color['2x4']=imagecolorallocate($image,255,120,120);
-    $matrix=putblock('2x4',$matrix);
     $border['4x2']=imagecolorallocate($image,40,200,40);
     $color['4x2']=imagecolorallocate($image,120,255,120);
-    $matrix=putblock('4x2',$matrix);
     $border['2x2']=imagecolorallocate($image,255,80,255);
     $color['2x2']=imagecolorallocate($image,255,120,255);
-    $matrix=putblock('2x2',$matrix);
+    $border['1x4']=imagecolorallocate($image,200,80,80);
+    $color['1x4']=imagecolorallocate($image,200,120,120);
+    $border['4x1']=imagecolorallocate($image,40,200,40);
+    $color['4x1']=imagecolorallocate($image,120,200,120);
+    $border['1x3']=imagecolorallocate($image,200,80,80);
+    $color['1x3']=imagecolorallocate($image,200,120,120);
+    $border['3x1']=imagecolorallocate($image,40,200,40);
+    $color['3x1']=imagecolorallocate($image,120,200,120);
+    $border['1x2']=imagecolorallocate($image,160,80,80);
+    $color['1x2']=imagecolorallocate($image,160,120,120);
+    $border['2x1']=imagecolorallocate($image,40,160,40);
+    $color['2x1']=imagecolorallocate($image,120,160,120);
+
+    // m*nのブロックを置けるところに置いてみる...
+    foreach ($blockorder as $block) {
+      if (isset($border[$block]) && isset($color[$block]))
+	$matrix=putblock($block,$matrix);
+    }
     foreach ($matrix as $x => $line) {
       foreach ($line as $y => $dot) {
 	if (preg_match('/([0-9]+)x([0-9]+)/',$dot,$r)) {
