@@ -29,11 +29,12 @@
   if (isset($source) && isset($path)) {
     // 元画像を読み込む
     $image=imagecreatefrompng($source);
+    printf("filename %s<br/>\n",preg_replace('/^.*\//','',$source));
 
     // 画像サイズの取得と表示
     $width=imagesx($image);
     $height=imagesy($image);
-    printf("image size %d x %d<br/>\n",$width,$height);
+    printf("imagesize %d x %d<br/>\n",$width,$height);
 
     // マス目のサイズ設定
     $step=10;
@@ -51,7 +52,7 @@
       $yoffset=$r[0];
     }
 
-    $blockorder=array('2x4','4x2','2x2');
+    $blockorder=array('2x4','4x2','2x2','1x4','4x1','1x3','3x1','1x2','2x1');
     if (isset($_POST['order']) && preg_match('/[0-9]+x[0-9]+/',$_POST['order'])) {
       $blockorder=explode(',',$_POST['order']);
     }
@@ -131,10 +132,14 @@
     $color['2x1']=imagecolorallocate($image,120,160,120);
 
     // m*nのブロックを置けるところに置いてみる...
+    $url=sprintf("?source=%s&blocksize=%d&xoffset=%d&yoffset=%d",str_replace(getcwd().'/','',$source),$step,$xoffset,$yoffset);
+    printf("<select size=\"%d\" onChange=\"location.href=this.options[this.selectedIndex].value;\">\n",count($blockorder));
     foreach ($blockorder as $block) {
       if (isset($border[$block]) && isset($color[$block]))
+	printf("<option value=\"%s\"/>\n",$url.'&order='.raiseOrder($blockorder,$block));
 	$matrix=putblock($block,$matrix);
     }
+    printf("</select>\n");
     foreach ($matrix as $x => $line) {
       foreach ($line as $y => $dot) {
 	if (preg_match('/([0-9]+)x([0-9]+)/',$dot,$r)) {
@@ -152,8 +157,22 @@
     // 枠を重ねた画像を表示
     $fn=sprintf("%s/blocksize%dxoffset%dyoffset%d.png",$path,$step,$xoffset,$yoffset);
     imagepng($image,$fn);
-    printf("<div><img src=\"%s\"/></div>",str_replace(getcwd().'/','',$fn));
+    printf("<div style=\"float:right;\"><img src=\"%s\"/></div>",str_replace(getcwd().'/','',$fn));
     return;
+  }
+
+  function raiseOrder($blockorder,$block) {
+    $ret=array();
+    foreach ($blockorder as $b) {
+      if ($b==$block) {
+	$c=array_pop($ret);
+	$ret[]=$b;
+	$ret[]=$c;
+      } else {
+	$ret[]=$b;
+      }
+    }
+    return implode(',',$ret);
   }
 
   // 指定サイズのブロックを置ける場所に置く
@@ -200,7 +219,7 @@
 	}
       }
 
-      printf("put %dx%d block: %d<br/>\n",$dx,$dy,$bcount);
+      printf("%dx%d block (%d)\n",$dx,$dy,$bcount);
     }
 
 
