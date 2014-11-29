@@ -84,6 +84,7 @@
     // 枠を重ねた画像を表示
     //$fn=sprintf("%s/blocksize%dxoffset%dyoffset%d.png",$path,$step,$xoffset,$yoffset);
     //imagepng($image,$fn);
+    header('Content-type: image/png');
     imagepng($image);
   }
 
