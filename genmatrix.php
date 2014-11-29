@@ -21,7 +21,7 @@
     unlink($path);
     mkdir($path);
     $source=$path.'/'.$_FILES['pngfile']['name'];
-    echo "$source\n";
+    //echo "$source\n";
     move_uploaded_file($_FILES['pngfile']['tmp_name'],$source);
     //$source=$_FILES['pngfile']['tmp_name'];
   }
