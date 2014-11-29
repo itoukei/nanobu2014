@@ -1,10 +1,30 @@
 <?php
   if (isset($_GET['source']) && file_exists($_GET['source'])) {
     $source=$_GET['source'];
-    $step=$_GET['blocksize'];
-    $xoffset=$_GET['xoffset'];
-    $yoffset=$_GET['yoffset'];
-    $blockorder=explode(',',$_GET['order']);
+
+    // マス目のサイズ設定
+    $step=10;
+    if (isset($_GET['blocksize']) && preg_match('/[0-9]+/',$_GET['blocksize'],$r)) {
+      $step=$r[0];
+    }
+
+    // X方向の開始位置オフセット設定
+    $xoffset=0;
+    if (isset($_GET['xoffset']) && preg_match('/[0-9]+/',$_GET['xoffset'],$r)) {
+      $xoffset=$r[0];
+    }
+
+    // Y方向の開始位置オフセット設定
+    $yoffset=0;
+    if (isset($_GET['yoffset']) && preg_match('/[0-9]+/',$_GET['yoffset'],$r)) {
+      $yoffset=$r[0];
+    }
+
+    // 各サイズのブロックを置く優先度を設定
+    $blockorder=array('2x4','4x2','2x2','1x4','4x1','1x3','3x1','1x2','2x1');
+    if (isset($_GET['order']) && preg_match('/[0-9]+x[0-9]+/',$_GET['order'])) {
+      $blockorder=explode(',',$_GET['order']);
+    }
 
     $image=imagecreatefrompng($source);
     $width=imagesx($image);
