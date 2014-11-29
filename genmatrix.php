@@ -52,6 +52,7 @@
       $yoffset=$r[0];
     }
 
+    // 各サイズのブロックを置く優先度を設定
     $blockorder=array('2x4','4x2','2x2','1x4','4x1','1x3','3x1','1x2','2x1');
     if (isset($_POST['order']) && preg_match('/[0-9]+x[0-9]+/',$_POST['order'])) {
       $blockorder=explode(',',$_POST['order']);
@@ -89,7 +90,7 @@
     }
     printf("</select>\n");
 
-    printf("<div style=\"float:right;\"><img src=\"image.php?source=%s&blocksize=%d&xoffset=%d&yoffset%d&order=%s\"/></div>",str_replace(getcwd().'/','',$source),$step,$xoffset,$yoffset,implode(',',$blockorder));
+    printf("<div style=\"float:right;\"><img src=\"image.php?source=%s&blocksize=%d&xoffset=%d&yoffset=%d&order=%s\"/></div>",str_replace(getcwd().'/','',$source),$step,$xoffset,$yoffset,implode(',',$blockorder));
     return;
   }
 
