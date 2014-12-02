@@ -33,6 +33,11 @@
     // 1x1の枠画像
     $waku=imagecolorallocate($image,100,100,255);
 
+    $xmin=99;
+    $xmax=0;
+    $ymin=99;
+    $ymax=0;
+
     // ブロックを置くべき場所を取得しながら、ひとまず1x1の枠を描画
     $matrix=array();
     for ($y=$yoffset;$y<$height;$y+=$step) {
@@ -55,6 +60,10 @@
 	  $my=($y-$yoffset)/$step;
 	  if (!isset($matrix[$mx])) $matrix[$mx]=array();
 	  $matrix[$mx][$my]=1;
+	  if ($mx < $xmin) $xmin=$mx;
+	  if ($mx > $xmax) $xmax=$mx;
+	  if ($my < $ymin) $ymin=$my;
+	  if ($my > $ymax) $ymax=$my;
 	}
       }
     }
@@ -100,6 +109,8 @@
       }
     }
 
+    $black=imagecolorallocate($image,0,0,0);
+    imagestring($image,2,0,0,sprintf("%dx%d",$xmax-$xmin+1,$ymax-$ymin+1),$black);
 
     // 枠を重ねた画像を表示
     //$fn=sprintf("%s/blocksize%dxoffset%dyoffset%d.png",$path,$step,$xoffset,$yoffset);
