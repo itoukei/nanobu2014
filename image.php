@@ -40,8 +40,8 @@
 
     // ブロックを置くべき場所を取得しながら、ひとまず1x1の枠を描画
     $matrix=array();
-    for ($y=$yoffset;$y<$height;$y+=$step) {
-      for ($x=$xoffset;$x<$width;$x+=$step) {
+    for ($y=$yoffset;$y+$step-1<$height;$y+=$step) {
+      for ($x=$xoffset;$x+$step-1<$width;$x+=$step) {
 	$wcount=0;
 	$ocount=0;
 	for ($j=0;$j<$step;$j++) {
